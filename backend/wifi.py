@@ -30,7 +30,7 @@ def login():
 
 
 def changePassword():
-    password = ''.join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(64))
+    password = ''.join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(63))
     print(password)
     try:
         browser.find_element(By.ID,"h_wifi_setting_btn").click()
@@ -44,15 +44,34 @@ def changePassword():
         sleep(2)
         browser.find_element(By.ID,"pass").clear()
         browser.find_element(By.ID,"pass").send_keys(password)
+    return password
     
 def downloadPicture():
-    img = browser.find_element(By.XPATH,'//*[@id="frmSSID1_24G5G"]/div[3]/div/div[7]/div/img')
+    img = browser.find_element(By.ID,'qrcode_img_dhcp')
     src = img.get_attribute("src")
-    browser.get(src)
     os.system(f"wget {src} -O password.png")
     
+
+def apply(password):
+    browser.find_element(By.ID,"ssid1_apply_5G").click()
+    browser.find_element(By.ID,"yesbtn").click()
+    sleep(5)
+    os.system(f"nmcli dev wifi connect Waxes27 password {password}")
+
+def getPassword():
+    browser.get('http://1.1.1.1/')
+    try:
+        downloadPicture()
+    except exeption.NoSuchElementException as e:
+        sleep(2)
+        downloadPicture()
     
 
 login()
-changePassword()
-downloadPicture()
+password = changePassword()
+apply(password)
+
+sleep(20)
+getPassword()
+
+
