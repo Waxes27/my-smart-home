@@ -1,0 +1,42 @@
+version: "3.8"
+services:
+  mysqldb:
+    image: mysql:5.7
+    restart: unless-stopped
+    # env_file: ./.env
+    networks:
+      my-net:
+        ipv4_address: 172.16.1.2
+    environment:
+      - MYSQL_ROOT_PASSWORD=D3Vel0pM3nT
+      - MYSQL_DATABASE=Home
+    ports:
+      - "3306:3306"
+    # volumes:
+    #   - db:/var/lib/mysql
+  app:
+    depends_on:
+      - mysqldb
+    build: .
+    restart: on-failure
+    # env_file: ./.env
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_APPLICATION_JSON: '{
+        "spring.datasource.url"  : "jdbc:mysql://172.16.1.2:3306/Home",
+        "spring.datasource.username" : "dev",
+        "spring.datasource.password" : "D3Vel0pM3nT",
+        "spring.jpa.properties.hibernate.dialect" : "org.hibernate.dialect.MySQL5InnoDBDialect",
+        "spring.jpa.hibernate.ddl-auto" : "create-drop"}'
+    volumes:
+      - .m2:/root/.m2
+    # stdin_open: true
+    # tty: true
+volumes:
+  db:
+
+networks:
+  my-net:
+    name: my-net
+    # external: true
